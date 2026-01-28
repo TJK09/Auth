@@ -1,63 +1,87 @@
-import React from 'react'
-import { useState } from 'react'
+import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 
-export const Login = () => {
+const Login = () =>{
+
+    const navigate = useNavigate();
+    
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [rememberMe, setRememberMe] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState ('')
     const [success, setSuccess] = useState(false)
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [rememberMe, setRememberMe] = useState(false)
 
-    const handleLogin = async (e) => {
+    const handleLogin = async (e)  =>{
         e.preventDefault();
-        if(! username || !password){
-        setError("username and password are required")
-        setLoading(false);
-        return;
-    }
-        setLoading(true);
-        setError('');
-        setSuccess(false);
+        if(!username || !password){
+            setError("Error! Enter Username and Password")
+            setLoading(false)
+            return
+        }
+        setLoading(true)
+        setError('')
+        setSuccess(false)
 
         try{
-            const res = await fetch("http://localhost:8000/login",{
+            const response = await fetch("http://localhost:8000/login",{
                 method: "POST",
-                headers:{"Content-Type":"application/json"},
-                body: JSON.stringify({username,password}),
-            })
-            const data = await res.json();
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({username,
+                    password})
+            });
+            const data = await response.json()
 
-            if(!res.ok){
+            if(!response.ok ){
                 setError("Invalid Credentials")
+                setSuccess(false)
+                setLoading(false)
             }else{
-                setSuccess(true);
+                setLoading(false)
                 if(rememberMe){
-                    localStorage.setItem("token",data.token);
-                    console.log(data.token);
-                }else 
-                    sessionStorage.setItem("token", data.token);
+                    localStorage.setItem('token', data.token)
+                    console.log("token in Local storage",data.token)
+                }else{
+                    sessionStorage.setItem("token",data.token)
+                    console.log('token with Session storage', data.token)
+                }
+                setSuccess(true)
+                navigate("/dashboard")
             }
-        }catch(err){
-            setError("Network Error");
+        }catch(error){
+            setError("Network Error")
         }
-        finally{
-            setLoading(false)
-        }
+        
     }
-  return (
-    <div>
-        <form onSubmit={handleLogin}>
-            <input type="text" value={username} placeholder='username' onChange={(e)=>setUsername(e.target.value)} />
-            <input type='password' value={password} placeholder='password' onChange={(e) =>setPassword(e.target.value)} />
-            <input type='checkbox' checked={rememberMe} onChange={(e) =>setRememberMe(e.target.checked)} />
 
-            <button type='submit' disabled={loading}>{loading ? "Logging In": "Login"}</button>
+    const handlelogout = async (e) => {
+        e.preventDefault();
+        localStorage.removeItem("Token")
 
-            {error && <p>{error}</p>}
-            {success && <p>Logged in</p>}
-        </form>
-    </div>
-  )
+        setUsername("")
+        setPassword("")
+    }
+
+
+    return(
+        <div>
+            <div className="container mx-auto flex flex-col justify-center items-center gap-5">
+                <form action="" onSubmit={handleLogin} className="flex flex-col justify-center items-center gap-5">
+                    <label htmlFor="">UserName</label>
+                    <input type="text" className="rounded border-2 border-black" onChange={(e)=>setUsername(e.target.value)} />
+                    <label htmlFor="">Password</label>
+                    <input type="password" className="rounded border-2 border-black " onChange={(e)=>setPassword(e.target.value)}/>
+                    <input type="checkbox" className="rounded border-2 border-black" onChange={(e)=>setRememberMe(e.target.checked)} />
+                    <button className="rounded border-2 w-full bg-[#fa4315] text-white" disabled={loading}>{loading ? 'Submitting':'Submit'}</button>
+                </form>
+                {error && <p className="text-red-700 text-lg font-bold">Login Failed</p>}
+                {success && <p className="text-green-600 text-lg font-bold">Logged In</p>}
+            </div>
+        </div>
+    )
 }
+
 export default Login;
