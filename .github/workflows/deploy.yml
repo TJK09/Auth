@@ -3,10 +3,11 @@ name: Deploy to Azure VM
 on:
   push:
     branches: [main]
+  workflow_dispatch:      # adds a manual "Run workflow" button
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1
