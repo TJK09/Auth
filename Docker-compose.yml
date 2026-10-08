@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend: 
+    build: ./login-backend
+    image: auth-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./login-backend/.env
+
+    restart: unless-stopped
+
+  frontend:
+    build: ./auth
+    image: auth-frontend
+    ports:
+     - "3000:3000"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped

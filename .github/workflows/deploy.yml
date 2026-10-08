@@ -20,12 +20,4 @@ jobs:
             cd ~/app
             git pull origin main
 
-            docker build -t auth-backend ./login-backend
-            docker build -t auth-frontend ./auth
-
-            docker rm -f backend frontend || true
-
-            docker run -d --name backend --restart unless-stopped \
-              -p 5000:5000 --env-file ~/app/login-backend/.env auth-backend
-            docker run -d --name frontend --restart unless-stopped \
-              -p 3000:3000 auth-frontend
+            docker compose up -d --build
